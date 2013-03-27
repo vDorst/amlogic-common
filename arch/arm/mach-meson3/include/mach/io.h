@@ -19,6 +19,7 @@
  */
 
 #include <mach/am_regs.h>
+#include <mach/cpu.h>
 
 #ifndef __ASM_ARCH_IO_H
 #define __ASM_ARCH_IO_H
