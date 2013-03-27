@@ -46,6 +46,7 @@
 #include "vout_log.h"
 #include <linux/amlog.h>
 #include <mach/power_gate.h>
+#include <plat/regops.h>
 
 #define PIN_MUX_REG_0	  0x202c
 #define P_PIN_MUX_REG_0  CBUS_REG_ADDR(PIN_MUX_REG_0)

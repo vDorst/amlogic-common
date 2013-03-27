@@ -47,6 +47,7 @@
 
 #include "plat/remote.h"
 #include "am_remote.h"
+#include <plat/regops.h>
 
 #undef NEW_BOARD_LEARNING_MODE
 

@@ -51,6 +51,7 @@ release_delay    =120
 #include <asm/io.h>
 #include <mach/am_regs.h>
 #include "am_remote.h"
+#include <plat/regops.h>
 
 //unit T=444.44us, base rate generator is 20us, so 1T=444.44/20 us
 #define RC6_UNIT_T 22

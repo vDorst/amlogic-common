@@ -38,6 +38,7 @@
 #include <asm/io.h>
 #include <mach/am_regs.h>
 #include "am_remote.h"
+#include <plat/regops.h>
 
 extern char *remote_log_buf;
 

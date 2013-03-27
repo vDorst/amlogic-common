@@ -52,6 +52,7 @@ debug_enable     =0
 #include <asm/io.h>
 #include <mach/am_regs.h>
 #include "am_remote.h"
+#include <plat/regops.h>
 
 //unit T=888.889us
 #define RC5_UNIT_T 889
