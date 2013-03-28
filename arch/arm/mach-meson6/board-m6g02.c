@@ -86,6 +86,9 @@
 #include <linux/efuse.h>
 #endif
 
+#ifdef CONFIG_AML_HDMI_TX
+#include <linux/hdmi/hdmi_config.h>
+#endif
 
 #ifdef CONFIG_AW_AXP
 #include <linux/power_supply.h>
@@ -101,8 +104,9 @@
 
 #include "includes/oimap.h"
 
-#include"includes/fb.h"
+#include "includes/fb.h"
 
+#include "includes/gpiostat.h"
 
 #ifdef CONFIG_AM_WIFI
 #include <plat/wifi_power.h>
@@ -117,8 +121,7 @@
 #endif
 
 #include"includes/hdmi-sensors.h"
-
-//#include"includes/nohdmi-senors.h"
+//#include"includes/nohdmi-sensors.h"
 
 //#include"includes/nohdmi-csdcdc.h"
 //#include"includes/nohdmi-cpufreq.h"
@@ -147,7 +150,7 @@ static struct platform_device saradc_device = {
 
 #include"includes/uart.h"
 
-
+#include"includes/hdmitx.h"
 /***********************************************************************
  * Nand Section
  **********************************************************************/
@@ -235,6 +238,7 @@ static int __init get_voltage_table(char *str)
 static __init void meson_init_machine(void)
 {
 //    meson_cache_init();
+print_gpio_status();
     setup_usb_devices();
     setup_devices_resource();
 #ifdef CONFIG_AM_WIFI
