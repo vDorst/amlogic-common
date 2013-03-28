@@ -581,12 +581,20 @@ int gpio_direction_input(unsigned gpio)
     return (get_gpio_val(bank, bit));
 }
 
+int gpio_direction_output(unsigned gpio, int value)
+{
+    gpio_bank_t bank = (gpio_bank_t)(gpio >> 16);
+    int bit = gpio & 0xFFFF;
+    set_gpio_val(bank, bit, value ? 1 : 0);
+    set_gpio_mode(bank, bit, GPIO_OUTPUT_MODE);
+    return 0;
+}
+
 void gpio_enable_level_int(int pin , int flag, int group)
 {
         group &= 7;
 
-  			aml_set_reg32_bits(P_GPIO_INTR_GPIO_SEL0+(group>>2), pin, (group&3)*8, 8);
-
+	aml_set_reg32_bits(P_GPIO_INTR_GPIO_SEL0+(group>>2), pin, (group&3)*8, 8);
         aml_set_reg32_bits(P_GPIO_INTR_EDGE_POL, 0, group, 1);
         aml_set_reg32_bits(P_GPIO_INTR_EDGE_POL, flag, group+16, 1);
 }
