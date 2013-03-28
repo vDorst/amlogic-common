@@ -100,6 +100,64 @@ static struct platform_device saradc_device = {
 };
 #endif
 
+
+#if defined(CONFIG_LEDS_GPIO)
+#include <linux/leds.h>
+#endif
+
+/* GPIO Defines */
+// LEDS
+#define GPIO_LED_STATUS	GPIO_AO(10)
+#define GPIO_LED_POWER	GPIO_AO(11)
+// ETHERNET
+#define GPIO_ETH_RESET	GPIO_D(7)
+// BUTTONS
+#define GPIO_KEY_POWER	GPIO_AO(3)
+// POWERSUPPLIES
+#define GPIO_PWR_WIFI	GPIO_C(5)
+#define GPIO_PWR_VCCIO	GPIO_AO(2)
+#define GPIO_PWR_VCCx2	GPIO_AO(6)
+#define GPIO_PWR_HDMI	GPIO_D(6)
+#define GPIO_PWR_SD	GPIO_CARD(8)
+// SD CARD
+#define GPIO_SD_WP	GPIO_CARD(6)
+#define GPIO_SD_DET	GPIO_CARD(7)
+
+#if defined(CONFIG_LEDS_GPIO)
+/* LED Class Support for the leds */
+static struct gpio_led aml_led_pins[] = {
+	{	
+		.name	= "Powerled",
+		.default_trigger = "default-on",
+		.gpio	= GPIO_LED_POWER,
+		.active_low	= 0,
+	},
+	{
+		.name	= "Statusled",
+#if defined(CONFIG_LEDS_TRIGGER_REMOTE_CONTROL)
+		.default_trigger = "rc",
+#else
+		.default_trigger = "none",
+#endif
+		.gpio	= GPIO_LED_STATUS,
+		.active_low	= 1,
+	},
+};
+
+static struct gpio_led_platform_data aml_led_data = {
+	.leds	= aml_led_pins,
+	.num_leds = ARRAY_SIZE(aml_led_pins),
+};
+
+static struct platform_device aml_leds = {
+	.name	= "leds-gpio",
+	.id	= -1,
+	.dev	= {
+		.platform_data	= &aml_led_data,
+	}
+};
+#endif
+
 #if defined(CONFIG_ADC_KEYPADS_AM)||defined(CONFIG_ADC_KEYPADS_AM_MODULE)
 #include <linux/input.h>
 #include <linux/adc_keypad.h>
@@ -136,26 +194,26 @@ static int _key_code_list[] = {KEY_POWER};
 
 static inline int key_input_init_func(void)
 {
-    WRITE_AOBUS_REG(AO_RTC_ADDR0, (READ_AOBUS_REG(AO_RTC_ADDR0) &~(1<<11)));
-    WRITE_AOBUS_REG(AO_RTC_ADDR1, (READ_AOBUS_REG(AO_RTC_ADDR1) &~(1<<3)));
-    return 0;
+	// Power Button, GPIO AO3, ACTIVE LOW
+	gpio_direction_input(GPIO_KEY_POWER);    
+	return 0;
 }
+
 static inline int key_scan(void* data)
 {
-    int *key_state_list = (int*)data;
-    int ret = 0;
-    key_state_list[0] = ((READ_AOBUS_REG(AO_RTC_ADDR1) >> 2) & 1) ? 0 : 1;
-    return ret;
+        int *key_state_list = (int*)data;
+        key_state_list[0] = gpio_get_value(GPIO_KEY_POWER) ? 0 : 1;
+        return 0;
 }
 
 static  struct key_input_platform_data  key_input_pdata = {
-    .scan_period = 20,
-    .fuzz_time = 60,
-    .key_code_list = &_key_code_list[0],
-    .key_num = ARRAY_SIZE(_key_code_list),
-    .scan_func = key_scan,
-    .init_func = key_input_init_func,
-    .config = 0,
+    .scan_period	= 20,
+    .fuzz_time		= 60,
+    .key_code_list	= &_key_code_list[0],
+    .key_num		= ARRAY_SIZE(_key_code_list),
+    .scan_func		= key_scan,
+    .init_func		= key_input_init_func,
+    .config		= 0,
 };
 
 static struct platform_device input_device_key = {
@@ -669,7 +727,7 @@ static struct resource amlogic_card_resource[] = {
 void extern_wifi_power(int is_power)
 {
     // TODO: Add Right Registers
-    reg_on_control(is_power);
+//    reg_on_control(is_power);
 }
 
 EXPORT_SYMBOL(extern_wifi_power);
