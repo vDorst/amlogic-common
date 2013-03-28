@@ -55,6 +55,11 @@
 #include <mach/usbsetting.h>
 #include <mach/gpio.h>
 
+#ifdef CONFIG_AM_ETHERNET
+#include <mach/am_regs.h>
+#include <mach/am_eth_reg.h>
+#endif
+
 #include "board-a11.h"
 
 #ifdef CONFIG_MMC_AML
@@ -493,8 +498,6 @@ static  int __init setup_i2c_devices(void)
     return 0;
 }
 
-
-
 static  int __init setup_uart_devices(void)
 {
 #if 0    
@@ -525,7 +528,6 @@ static void __init device_pinmux_init(void)
     set_audio_pinmux(AUDIO_OUT_TEST_N); //External AUDIO DAC
     set_audio_pinmux(SPDIF_OUT_GPIOA); //SPDIF GPIOA_6
 #endif 
-
 }
 
 static void __init  device_clk_setting(void)
@@ -605,6 +607,115 @@ static struct platform_device aml_uart_device = {
         .platform_data = &aml_uart_plat,
     },
 };
+
+#ifdef CONFIG_AM_ETHERNET
+//#define ETH_MODE_RGMII
+//#define ETH_MODE_RMII_INTERNAL
+#define ETH_MODE_RMII_EXTERNAL
+static void aml_eth_reset(void)
+{
+    unsigned int val = 0;
+
+    printk(KERN_INFO "****** aml_eth_reset() ******\n");
+#ifdef ETH_MODE_RGMII
+    val = 0x211;
+#else
+    val = 0x241;
+#endif
+
+    /* setup ethernet mode */
+    aml_set_reg32_mask(P_PREG_ETHERNET_ADDR0, val);
+
+    /* setup ethernet interrupt */
+    aml_set_reg32_mask(P_A9_0_IRQ_IN0_INTR_MASK, 1 << 8);
+    aml_set_reg32_mask(P_A9_0_IRQ_IN1_INTR_STAT, 1 << 8);
+
+    /* hardware reset ethernet phy */
+    gpio_direction_output(GPIO_ETH_RESET, 0);
+    msleep(20);
+    gpio_set_value(GPIO_ETH_RESET, 1);
+
+}
+
+static void aml_eth_clock_enable(void)
+{
+    unsigned int val = 0;
+
+    printk(KERN_INFO "****** aml_eth_clock_enable() ******\n");
+#ifdef ETH_MODE_RGMII
+    val = 0x309;
+#elif defined(ETH_MODE_RMII_EXTERNAL)
+    val = 0x130;
+#else
+    val = 0x702;
+#endif
+    /* setup ethernet clk */
+    aml_set_reg32_mask(P_HHI_ETH_CLK_CNTL, val);
+}
+
+static void aml_eth_clock_disable(void)
+{
+    printk(KERN_INFO "****** aml_eth_clock_disable() ******\n");
+    /* disable ethernet clk */
+    aml_clr_reg32_mask(P_HHI_ETH_CLK_CNTL, 1 << 8);
+}
+
+static pinmux_item_t aml_eth_pins[] = {
+    /* RMII pin-mux */
+    {
+	.reg = PINMUX_REG(6),
+	.clrmask = 0,
+#ifdef ETH_MODE_RMII_EXTERNAL
+	.setmask = 0x8007ffe0,
+#else
+	.setmask = 0x4007ffe0,
+#endif
+    },
+    PINMUX_END_ITEM
+};
+
+static pinmux_set_t aml_eth_pinmux = {
+    .chip_select = NULL,
+    .pinmux = aml_eth_pins,
+};
+
+static void aml_eth_pinmux_setup(void)
+{
+    printk(KERN_INFO "****** aml_eth_pinmux_setup() ******\n");
+    pinmux_set(&aml_eth_pinmux);
+}
+
+static void aml_eth_pinmux_cleanup(void)
+{
+    printk(KERN_INFO "****** aml_eth_pinmux_cleanup() ******\n");
+    pinmux_clr(&aml_eth_pinmux);
+}
+
+static void aml_eth_init(void)
+{
+    aml_eth_pinmux_setup();
+    aml_eth_clock_enable();
+    aml_eth_reset();
+}
+
+static struct aml_eth_platdata aml_eth_pdata __initdata = {
+    .pinmux_items = aml_eth_pins,
+    .pinmux_setup = aml_eth_pinmux_setup,
+    .pinmux_cleanup = aml_eth_pinmux_cleanup,
+    .clock_enable = aml_eth_clock_enable,
+    .clock_disable = aml_eth_clock_disable,
+    .reset = aml_eth_reset,
+};
+
+static void __init setup_eth_device(void)
+{
+    meson_eth_set_platdata(&aml_eth_pdata);
+    aml_eth_init();
+}
+#endif
+
+
+
 
 #if defined(CONFIG_AML_RTC)
 static struct platform_device meson_rtc_device = {
@@ -1160,7 +1271,9 @@ static __init void meson_m3ref_init(void)
 #if defined(CONFIG_I2C_AML) || defined(CONFIG_I2C_HW_AML)
     aml_i2c_init();
 #endif
-
+#ifdef CONFIG_AM_ETHERNET
+    setup_eth_device();
+#endif
     disable_unused_model();
 }
 
