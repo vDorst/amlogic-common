@@ -436,6 +436,7 @@ void audio_set_clk(unsigned freq, unsigned fs_config)
 {
     int i;
     int xtal = 0;
+    int clk;
     
     int (*audio_clock_config)[2];
     
@@ -483,7 +484,7 @@ void audio_set_clk(unsigned freq, unsigned fs_config)
 		};
 #if MESON_CPU_TYPE < MESON_CPU_TYPE_MESON6
 	// get system crystal freq
-		clk=clk_get_sys("clk_xtal", NULL);
+		clk = clk_get_sys("clk_xtal", NULL);
 		if(!clk)
 		{
 			printk(KERN_ERR "can't find clk %s for AUDIO PLL SETTING!\n\n","clk_xtal");
