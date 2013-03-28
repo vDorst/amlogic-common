@@ -725,49 +725,79 @@ static struct platform_device meson_rtc_device = {
 #endif /* CONFIG_AML_RTC */
 
 #ifdef CONFIG_AM_NAND
-static struct mtd_partition normal_partition_info[] = {
+
+/*** Default NAND layout for A11 ***
+Creating 7 MTD partitions on "nandmulti":
+4M    0x000000800000-0x000000c00000 : "logo"      : 8M
+12M   0x000000c00000-0x000001400000 : "boot"      : 8M
+20M   0x000001400000-0x000021400000 : "system"    : 512M
+532M  0x000021400000-0x000034000000 : "cache"     : 300M
+832M  0x000034000000-0x000074000000 : "NFTL_Part" : 1024M
+1856M 0x000074000000-0x000080800000 : "backup"    : 200M
+2056M 0x000080800000-0x000100000000 : "userdata"  : 2040M
+*/ 
+
+static struct mtd_partition normal_partition_info[] = { // 4G
+#ifndef CONFIG_AMLOGIC_SPI_NOR
+/* Hide uboot partition
+	{
+		.name = "uboot",
+		.offset = 0,
+		.size = 4*1024*1024,
+	},
+//*/
     {
-        .name = "logo",
-        .offset = 32*SZ_1M+40*SZ_1M,
-        .size = 8*SZ_1M,
+        .name = "ubootenv",
+        .offset = 4*1024*1024,
+        .size = 0x2000,
     },
-    {
-        .name = "aml_logo",
-        .offset = 48*SZ_1M+40*SZ_1M,
-        .size = 8*SZ_1M,
-    },
+/* Hide recovery partition
     {
         .name = "recovery",
-        .offset = 64*SZ_1M+40*SZ_1M,
-        .size = 8*SZ_1M,
+        .offset = 6*1024*1024,
+        .size = 2*1024*1024,
     },
-    {
-        .name = "boot",
-        .offset = 96*SZ_1M+40*SZ_1M,
-        .size = 8*SZ_1M,
-    },
-    {
-        .name = "system",
-        .offset = 128*SZ_1M+40*SZ_1M,
-        .size = 512*SZ_1M,
-    },
-    {
-        .name = "cache",
-        .offset = 640*SZ_1M+40*SZ_1M,
-        .size = 128*SZ_1M,
-    },
-    {
-        .name = "userdata",
-        .offset = 768*SZ_1M+40*SZ_1M,
-        .size = 512*SZ_1M,
-    },
-    {
-        .name = "NFTL_Part",
-        .offset = MTDPART_OFS_APPEND,
-        .size = MTDPART_SIZ_FULL,
-    },
+//*/
+#endif
+	{//4M for logo
+		.name   = "logo",
+		.offset = 8*1024*1024,
+		.size   = 4*1024*1024,
+	},
+	{//8M for kernel
+		.name   = "boot",
+		.offset = (8+4)*1024*1024,
+		.size   = 8*1024*1024,
+	},
+	{//512M for android system.
+		.name   = "system",
+		.offset = (8+4+8)*1024*1024,
+		.size   = 512*1024*1024,
+	},
+	{//300M for cache
+		.name   = "cache",
+		.offset = (8+4+8+512)*1024*1024,
+		.size   = 300*1024*1024,
+	},
+#ifdef CONFIG_AML_NFTL
+	{//1G for NFTL_part
+		.name   = "NFTL_Part",
+		.offset = (8+4+8+512+300)*1024*1024,
+		.size   = 1024*1024*1024,
+	},
+	{//other 2040M for user data
+		.name = "userdata",
+		.offset = MTDPART_OFS_APPEND,
+		.size = MTDPART_SIZ_FULL,
+	},
+#else
+	{
+		.name = "userdata",
+		.offset=MTDPART_OFS_APPEND,
+		.size=MTDPART_SIZ_FULL,
+	},
+#endif
 };
-
 
 static struct aml_nand_platform aml_nand_mid_platform[] = {
 #ifndef CONFIG_AMLOGIC_SPI_NOR
