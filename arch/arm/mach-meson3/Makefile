@@ -15,8 +15,8 @@ obj-$(CONFIG_MESON_SUSPEND)	+= power_suspend.o
 #obj-$(CONFIG_ARCH_MESON3)	+= sram.o sleep.o
 
 obj-$(CONFIG_MACH_M3_REF)	+= $(if $(filter y,$(CONFIG_MESON_PLATFORM_API)),boards/,)board-m3ref.o
-obj-$(CONFIG_MACH_M3_REF)	+= $(if $(filter y,$(CONFIG_MESON_PLATFORM_API)),boards/,)board-m3ref-panel.o
-obj-$(CONFIG_MACH_M3_REF)	+= $(if $(filter y,$(CONFIG_MESON_PLATFORM_API)),boards/,)board-m3ref-power.o
+#obj-$(CONFIG_MACH_M3_REF)	+= $(if $(filter y,$(CONFIG_MESON_PLATFORM_API)),boards/,)board-m3ref-panel.o
+#obj-$(CONFIG_MACH_M3_REF)	+= $(if $(filter y,$(CONFIG_MESON_PLATFORM_API)),boards/,)board-m3ref-power.o
 obj-$(CONFIG_MACH_M3_SKT)	+= $(if $(filter y,$(CONFIG_MESON_PLATFORM_API)),boards/,)board-m3skt.o
 
 plat-api=$(wildcard $(wildcard $(srctree)/$(src)/boards/*.c))
