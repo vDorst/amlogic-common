@@ -695,7 +695,7 @@ int __init_or_module do_one_initcall(initcall_t fn)
 
 extern initcall_t __defferred_initcall_start[], __defferred_initcall_end[];
 /*load deferred modules*/
-static int do_deferred_initcalls_thread(void *data)
+static int do_deferred_initcalls_thread(void *arg)
 {
 	static int already_run=0;
 	initcall_t *call;
@@ -718,8 +718,8 @@ static int do_deferred_initcalls_thread(void *data)
 
 	free_initmem();
 
-	set_current_state(TASK_INTERRUPTIBLE); 
-	schedule_timeout(HZ*10); 
+	set_current_state(TASK_INTERRUPTIBLE);
+	schedule_timeout(HZ*10);
 
 	//unlock_kernel();
 	return 0;
