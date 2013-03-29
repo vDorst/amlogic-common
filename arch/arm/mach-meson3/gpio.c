@@ -592,11 +592,11 @@ int gpio_direction_output(unsigned gpio, int value)
 
 void gpio_enable_level_int(int pin , int flag, int group)
 {
-        group &= 7;
+    group &= 7;
 
 	aml_set_reg32_bits(P_GPIO_INTR_GPIO_SEL0+(group>>2), pin, (group&3)*8, 8);
-        aml_set_reg32_bits(P_GPIO_INTR_EDGE_POL, 0, group, 1);
-        aml_set_reg32_bits(P_GPIO_INTR_EDGE_POL, flag, group+16, 1);
+    aml_set_reg32_bits(P_GPIO_INTR_EDGE_POL, 0, group, 1);
+    aml_set_reg32_bits(P_GPIO_INTR_EDGE_POL, flag, group+16, 1);
 }
 int gpio_to_idx(unsigned gpio)
 {
@@ -657,8 +657,8 @@ gpio_mode_t get_gpio_mode(gpio_bank_t bank, int bit)
     }
 #endif
     if (bank==PREG_PAD_GPIOAO)
-        return (READ_AOBUS_REG_BITS(addr, bit, 1) > 0) ? (GPIO_INPUT_MODE) : (GPIO_OUTPUT_MODE);
-    return (READ_CBUS_REG_BITS(addr, bit, 1) > 0) ? (GPIO_INPUT_MODE) : (GPIO_OUTPUT_MODE);
+        return (aml_get_reg32_bits(addr, bit, 1) > 0) ? (GPIO_INPUT_MODE) : (GPIO_OUTPUT_MODE);
+    return (aml_get_reg32_bits(addr, bit, 1) > 0) ? (GPIO_INPUT_MODE) : (GPIO_OUTPUT_MODE);
 }
 
 int set_gpio_mode(gpio_bank_t bank, int bit, gpio_mode_t mode)
@@ -696,13 +696,12 @@ int set_gpio_val(gpio_bank_t bank, int bit, unsigned long val)
 #endif
     /* AO output: Because GPIO enable and output use the same register, we need shift 16 bit*/
     if(bank == PREG_PAD_GPIOAO) { /* AO output need shift 16 bit*/
-	WRITE_AOBUS_REG_BITS(addr, val ? 1 : 0, bit+16, 1);
+		aml_set_reg32_bits(addr, val ? 1 : 0, bit+16, 1);
     } else {
-	WRITE_CBUS_REG_BITS(addr, val ? 1 : 0, bit, 1);
+		aml_set_reg32_bits(addr, val ? 1 : 0, bit, 1);
     }
     return 0;
 }
-
 
 void gpio_free(unsigned gpio)
 {
