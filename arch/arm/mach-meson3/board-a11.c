@@ -518,16 +518,15 @@ static  int __init setup_uart_devices(void)
 
 static void __init device_pinmux_init(void)
 {
-#if 0 ///@todo Jerry Yu, Compile break , enable it later	
-    clearall_pinmux();
+	
+    // clearall_pinmux();
     /*other deivce power on*/
-    uart_set_pinmux(UART_PORT_AO, UART_AO_GPIO_AO0_AO1_STD);
+    // uart_set_pinmux(UART_PORT_AO, UART_AO_GPIO_AO0_AO1_STD);
     /*pinmux of eth*/
-    eth_pinmux_init();
-    set_audio_pinmux(AUDIO_IN_JTAG); // for MIC input
-    set_audio_pinmux(AUDIO_OUT_TEST_N); //External AUDIO DAC
-    set_audio_pinmux(SPDIF_OUT_GPIOA); //SPDIF GPIOA_6
-#endif 
+    // eth_pinmux_init();
+//    set_audio_pinmux(AUDIO_IN_JTAG); // for MIC input
+//    set_audio_pinmux(AUDIO_OUT_TEST_N); //External AUDIO DAC
+//    set_audio_pinmux(SPDIF_OUT_GPIOA); //SPDIF GPIOA_6
 }
 
 static void __init  device_clk_setting(void)
@@ -572,26 +571,28 @@ static void  __init backup_board_pinmux(void)
 #endif    
 }
 
-static  pinmux_item_t   uart_pins[]={
-		{
-			.reg=PINMUX_REG(AO),
-			.clrmask=3<<16,
-			.setmask=3<<11
-		},
-		PINMUX_END_ITEM
-	};
-static  pinmux_set_t   aml_uart_ao={
-	.chip_select=NULL,
-	.pinmux=&uart_pins[0]
+/***********************************************************************
+ * UART Section
+ **********************************************************************/
+static pinmux_item_t uart_pins[] = {
+    {
+        .reg = PINMUX_REG(AO),
+        .setmask = 3 << 11
+    },
+    PINMUX_END_ITEM
 };
-static struct aml_uart_platform  __initdata aml_uart_plat = {
-    
-    .uart_line[0]       =  UART_AO,
-    .uart_line[1]       =   UART_A,
-    .uart_line[2]       =   UART_B,
-    .uart_line[3]       =   UART_C,
 
-    
+static pinmux_set_t aml_uart_ao = {
+    .chip_select = NULL,
+    .pinmux = &uart_pins[0]
+};
+
+static struct __init aml_uart_platform aml_uart_plat = {
+    .uart_line[0]   = UART_AO,
+    .uart_line[1]   = UART_A,
+    .uart_line[2]   = UART_B,
+    .uart_line[3]   = UART_C,
+
     .pinmux_uart[0] = (void*)&aml_uart_ao,
     .pinmux_uart[1] = NULL,
     .pinmux_uart[2] = NULL,
@@ -599,10 +600,10 @@ static struct aml_uart_platform  __initdata aml_uart_plat = {
 };
 
 static struct platform_device aml_uart_device = {
-    .name         = "mesonuart",
-    .id       = -1,
-    .num_resources    = 0,
-    .resource     = NULL,
+    .name       = "mesonuart",
+    .id     = -1,
+    .num_resources  = 0,
+    .resource   = NULL,
     .dev = {
         .platform_data = &aml_uart_plat,
     },
@@ -1224,15 +1225,9 @@ static struct platform_device aml_pm_device = {
 #endif //CONFIG_SUSPEND
 
 static struct platform_device  *platform_devs[] = {
-///    &meson_device_uart,
-    &meson_device_fb,
     &aml_uart_device,
-    &meson_device_codec,
-#if defined(CONFIG_I2C_AML) || defined(CONFIG_I2C_HW_AML)
-    &aml_i2c_device,
-    &aml_i2c_device1,
-    &aml_i2c_device2,
-#endif
+    // &meson_device_fb,
+    // &meson_device_codec,
 #if defined(CONFIG_SND_AML_M3)
     &aml_audio,
     &aml_dai,
@@ -1276,19 +1271,42 @@ static struct platform_device  *platform_devs[] = {
 #endif
 };
 
+static void __init power_hold(void)
+{
+	printk(KERN_INFO "power hold set high!\n");
+
+	printk(KERN_INFO "set_vccio and set_vccx2 power up\n");
+	// VCCIO +3V3 -- GPIO AO2, ACTIVE HIGH
+	gpio_direction_output( GPIO_PWR_VCCIO, 1);
+
+	// VCCx2 +5V -- GPIO AO6, ACTIVE HIGH.
+	gpio_direction_output( GPIO_PWR_VCCx2, 1);
+
+	printk(KERN_INFO "set_hdmi power up\n");
+	// HDMI Power +5V -- GPIO D6, ACTIVE HIGH
+	gpio_direction_output( GPIO_PWR_HDMI, 1);
+
+	// Turn On Wifi Power. So the wifi-module can be detected.
+	// extern_usb_wifi_power(1);
+	
+	gpio_direction_output( GPIO_LED_POWER, 0);
+	gpio_direction_output( GPIO_LED_STATUS, 0);
+	
+}
+
 static __init void meson_m3ref_init(void)
 {
-    backup_board_pinmux();
+    // backup_board_pinmux();
     meson_cache_init();
+	power_hold();
     setup_devices_resource();
-    ///setup_i2c_devices();
+	platform_add_devices(platform_devs, ARRAY_SIZE(platform_devs));
+	
+    // setup_i2c_devices();
 
-    ///setup_uart_devices();
-    device_clk_setting();
-    device_pinmux_init();
-
-    ///platform_device_register(&aml_uart_device);
-    platform_add_devices(platform_devs, ARRAY_SIZE(platform_devs));
+    // setup_uart_devices();
+    // device_clk_setting();
+    // device_pinmux_init();
 
     m3ref_set_vccx2(1);
     setup_usb_devices();
