@@ -907,7 +907,7 @@ static int __init am_uart_console_setup(struct console *co, char *options)
 	return 0;		/* successful initialization */
 }
 
-static void am_uart_console_write(struct console *co, const char *s, u_int count)
+static void __init am_uart_console_write(struct console *co, const char *s, u_int count)
 {
        int index = am_ports[co->index].line;
        spinlock_t  * wr_lock = &am_ports[co->index].wr_lock;
