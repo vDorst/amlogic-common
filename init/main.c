@@ -695,7 +695,7 @@ int __init_or_module do_one_initcall(initcall_t fn)
 
 extern initcall_t __defferred_initcall_start[], __defferred_initcall_end[];
 /*load deferred modules*/
-void do_deferred_initcalls_thread(void)
+static int do_deferred_initcalls_thread(void *data)
 {
 	static int already_run=0;
 	initcall_t *call;
@@ -705,7 +705,7 @@ void do_deferred_initcalls_thread(void)
 	if (already_run)
 	{
 		printk("do_deferred_initcalls() has already run\n");
-		return;
+		return 0;
 	}
 
 	already_run=1;
@@ -722,12 +722,12 @@ void do_deferred_initcalls_thread(void)
 	schedule_timeout(HZ*10); 
 
 	//unlock_kernel();
+	return 0;
 }
 
 void do_deferred_initcalls(void)
 {
     kernel_thread(do_deferred_initcalls_thread, NULL, CLONE_KERNEL | SIGCHLD);
-	return 0;
 }
 
 EXPORT_SYMBOL(do_deferred_initcalls);
