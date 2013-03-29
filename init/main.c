@@ -697,10 +697,10 @@ extern initcall_t __defferred_initcall_start[], __defferred_initcall_end[];
 /*load deferred modules*/
 void do_deferred_initcalls_thread(void)
 {
-	daemonize("deferred_module_init"); 
-
-	initcall_t *call;
 	static int already_run=0;
+	initcall_t *call;
+
+	daemonize("deferred_module_init"); 
 
 	if (already_run)
 	{
