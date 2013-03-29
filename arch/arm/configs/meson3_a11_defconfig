@@ -1079,7 +1079,13 @@ CONFIG_AML_HDMI_TX=y
 #
 # Amlogic Post Process Manager driver
 #
+<<<<<<< HEAD:arch/arm/configs/meson3_a11_defconfig
 # CONFIG_POST_PROCESS_MANAGER is not set
+=======
+CONFIG_POST_PROCESS_MANAGER=y
+CONFIG_POST_PROCESS_MANAGER_PPSCALER=y
+CONFIG_POST_PROCESS_MANAGER_3D_PROCESS=y
+>>>>>>> nspierbundel/test:.config
 
 #
 # Amlogic Camera Support
@@ -1123,7 +1129,16 @@ CONFIG_AML_HDMI_TX=y
 #
 # Mali GPU OpenGL device driver
 #
+<<<<<<< HEAD:arch/arm/configs/meson3_a11_defconfig
 # CONFIG_MALI400 is not set
+=======
+CONFIG_MALI400=m
+CONFIG_MALI_CLK_400M=y
+# CONFIG_MALI_CLK_333M is not set
+# CONFIG_MALI_CLK_250M is not set
+# CONFIG_MALI400_DEBUG is not set
+# CONFIG_MALI400_GPU_UTILIZATION is not set
+>>>>>>> nspierbundel/test:.config
 
 #
 # Generic Driver Options
