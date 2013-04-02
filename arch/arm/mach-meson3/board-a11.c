@@ -83,6 +83,10 @@
 
 #include "board-m3ref-pinmux.h"
 
+#if defined(CONFIG_AML_HDMI_TX)
+#include <plat/hdmi_config.h>
+#endif
+
 #define DEBUG_GPIO_INTERFACE
 #ifdef DEBUG_GPIO_INTERFACE
 #include <mach/gpio.h>
@@ -1224,8 +1228,33 @@ static struct platform_device aml_pm_device = {
 };
 #endif //CONFIG_SUSPEND
 
+#if defined(CONFIG_AML_HDMI_TX)
+static struct hdmi_phy_set_data brd_phy_data[] = {
+	{-1,   -1},         //end of phy setting
+};
+
+static struct hdmi_config_platform_data aml_hdmi_pdata ={
+	.hdmi_5v_ctrl = NULL,
+	.hdmi_3v3_ctrl = NULL,
+	.hdmi_pll_vdd_ctrl = NULL,
+	.hdmi_sspll_ctrl = NULL,
+	.phy_data = brd_phy_data,
+};
+
+static struct platform_device aml_hdmi_device = {
+	.name = "amhdmitx",
+	.id   = -1,
+	.dev  = {
+		.platform_data = &aml_hdmi_pdata,
+	}
+};
+#endif
+
 static struct platform_device  *platform_devs[] = {
     &aml_uart_device,
+#if defined(CONFIG_AML_HDMI_TX)
+    &aml_hdmi_device,
+#endif
     // &meson_device_fb,
     // &meson_device_codec,
 #if defined(CONFIG_SND_AML_M3)
@@ -1324,6 +1353,7 @@ static __init void meson_m3ref_init(void)
 #endif
     disable_unused_model();
 }
+
 
 /***********************************************************************
  * IO Mapping
