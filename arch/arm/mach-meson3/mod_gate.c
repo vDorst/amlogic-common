@@ -732,7 +732,7 @@ void switch_mod_gate_by_name(const char* mod_name, int flag)
 }
 EXPORT_SYMBOL(switch_mod_gate_by_name);
 
-void power_gate_init(void)
+void power_gate_init2(void)
 {
     GATE_INIT(DDR);
     GATE_INIT(VLD_CLK);
