@@ -1409,14 +1409,10 @@ static struct resource aml_m3_audio_resource[] = {
     },
 };
 
-extern char * get_vout_mode_internal(void);
 
 /* Check current mode, 0: panel; 1: !panel*/
 static int get_display_mode(void) {
-	if (strncmp("panel", get_vout_mode_internal(), 5))
 		return 1;
-	else
-		return 0;
 }
 
 static int aml_m3_is_hp_plugged(void)
@@ -1615,8 +1611,8 @@ static __init void meson_m3ref_init(void)
     ///platform_device_register(&aml_uart_device);
     platform_add_devices(platform_devs, ARRAY_SIZE(platform_devs));
 
-    m3ref_lcd_init();
-    m3ref_power_init();
+    //m3ref_lcd_init();
+    //m3ref_power_init();
     m3ref_set_vccx2(1);
     setup_usb_devices();
 

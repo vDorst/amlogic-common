@@ -1416,8 +1416,18 @@ static __init void m3_fixup(struct machine_desc *mach, struct tag *tag, char **c
 
 }
 
-
 MACHINE_START(M3_REF, "Amlogic Meson3 reference development platform")
+    .boot_params    = BOOT_PARAMS_OFFSET,
+    .map_io         = meson_map_io,
+    .init_irq       = m3_irq_init,
+    .timer          = &meson_sys_timer,
+    .init_machine   = meson_m3ref_init,
+    .fixup          = m3_fixup,
+    .video_start    = RESERVED_MEM_START,
+    .video_end      = RESERVED_MEM_END,
+MACHINE_END
+
+MACHINE_START(VMX25, "Amlogic Meson3 reference development platform (legacy)")
     .boot_params    = BOOT_PARAMS_OFFSET,
     .map_io         = meson_map_io,
     .init_irq       = m3_irq_init,
