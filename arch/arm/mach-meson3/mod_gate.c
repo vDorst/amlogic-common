@@ -261,9 +261,9 @@ static int _switch_gate(mod_type_t type, int flag)
         case MOD_VDEC:
             PRINT_INFO("turn %s vdec module\n", flag?"on":"off");
             if (flag) {               
-                GATE_ON(DOS);
+                GATE_ON(VLD_CLK);
             } else {
-                GATE_OFF(DOS);
+                GATE_OFF(VLD_CLK);
             }
             break;
         case MOD_AUDIO:
@@ -387,13 +387,13 @@ static int _switch_gate(mod_type_t type, int flag)
         case MOD_MIPI:
             PRINT_INFO("turn %s mipi module\n", flag?"on":"off");
             if (flag) {
-                GATE_ON(MIPI_APB_CLK);
-                GATE_ON(MIPI_SYS_CLK);
-                GATE_ON(MIPI_PHY);
+                GATE_ON(IQIDCT_CLK);
+                GATE_ON(MC_CLK);
+                GATE_ON(MDEC_CLK_PIC_DC);
             } else {
-                GATE_OFF(MIPI_APB_CLK);
-                GATE_OFF(MIPI_SYS_CLK);
-                GATE_OFF(MIPI_PHY);
+                GATE_OFF(IQIDCT_CLK);
+                GATE_OFF(MC_CLK);
+                GATE_OFF(MDEC_CLK_PIC_DC);
             }
             break;
         case MOD_BT656:
@@ -735,9 +735,9 @@ EXPORT_SYMBOL(switch_mod_gate_by_name);
 void power_gate_init(void)
 {
     GATE_INIT(DDR);
-    GATE_INIT(DOS);
-    GATE_INIT(MIPI_APB_CLK);
-    GATE_INIT(MIPI_SYS_CLK);
+    GATE_INIT(VLD_CLK);
+    GATE_INIT(IQIDCT_CLK);
+    GATE_INIT(MC_CLK);
     GATE_INIT(AHB_BRIDGE);
     GATE_INIT(ISA);
     GATE_INIT(APB_CBUS);
@@ -784,7 +784,7 @@ void power_gate_init(void)
     GATE_INIT(RESET);
     GATE_INIT(NAND);
     GATE_INIT(HIU_PARSER_TOP);
-    GATE_INIT(MIPI_PHY);
+    GATE_INIT(MDEC_CLK_PIC_DC);
     GATE_INIT(VIDEO_IN);
     GATE_INIT(AHB_ARB0);
     GATE_INIT(EFUSE);
